@@ -20,139 +20,139 @@ import { OnUpdateType } from "../metadata/types/OnUpdateType"
 export type ReturningType = "insert" | "update" | "delete"
 
 /**
- * Driver organizes TypeORM communication with specific database management system.
+ * Driver 负责组织 TypeORM 与特定数据库管理系统的通信。
  */
 export interface Driver {
     /**
-     * Connection options.
+     * 连接选项。
      */
     options: BaseDataSourceOptions
 
     /**
-     * Database version/release. Often requires a SQL query to the DB, so it is not always set
+     * 数据库版本/发行版。通常需要向数据库发送 SQL 查询，因此并不总是设置
      */
     version?: string
 
     /**
-     * Database name used to perform all write queries.
+     * 用于执行所有写查询的数据库名称。
      *
-     * todo: probably move into query runner.
+     * todo: 可能会移到查询运行器中。
      */
     database?: string
 
     /**
-     * Schema name used to perform all write queries.
+     * 用于执行所有写查询的模式名称。
      */
     schema?: string
 
     /**
-     * Indicates if replication is enabled.
+     * 指示是否启用了复制。
      */
     isReplicated: boolean
 
     /**
-     * Indicates if tree tables are supported by this driver.
+     * 指示此驱动程序是否支持树表。
      */
     treeSupport: boolean
 
     /**
-     * Represent transaction support by this driver
+     * 表示此驱动程序支持的事务类型
      */
     transactionSupport: "simple" | "nested" | "none"
 
     /**
-     * Gets list of supported column data types by a driver.
+     * 获取驱动程序支持的列数据类型列表。
      */
     supportedDataTypes: ColumnType[]
 
     /**
-     * Returns type of upsert supported by driver if any
+     * 返回驱动程序支持的 upsert 类型（如果有）
      */
     supportedUpsertTypes: UpsertType[]
 
     /**
-     * Returns list of supported onDelete types by driver
+     * 返回驱动程序支持的 onDelete 类型列表
      */
     supportedOnDeleteTypes?: OnDeleteType[]
 
     /**
-     * Returns list of supported onUpdate types by driver
+     * 返回驱动程序支持的 onUpdate 类型列表
      */
     supportedOnUpdateTypes?: OnUpdateType[]
 
     /**
-     * Default values of length, precision and scale depends on column data type.
-     * Used in the cases when length/precision/scale is not specified by user.
+     * 长度、精度和小数位数的默认值取决于列数据类型。
+     * 用于用户未指定长度/精度/小数位数的情况。
      */
     dataTypeDefaults: DataTypeDefaults
 
     /**
-     * Gets list of spatial column data types.
+     * 获取空间列数据类型列表。
      */
     spatialTypes: ColumnType[]
 
     /**
-     * Gets list of column data types that support length by a driver.
+     * 获取驱动程序支持长度的列数据类型列表。
      */
     withLengthColumnTypes: ColumnType[]
 
     /**
-     * Gets list of column data types that support precision by a driver.
+     * 获取驱动程序支持精度的列数据类型列表。
      */
     withPrecisionColumnTypes: ColumnType[]
 
     /**
-     * Gets list of column data types that support scale by a driver.
+     * 获取驱动程序支持小数位数的列数据类型列表。
      */
     withScaleColumnTypes: ColumnType[]
 
     /**
-     * Orm has special columns and we need to know what database column types should be for those types.
-     * Column types are driver dependant.
+     * ORM 有特殊列，我们需要知道这些类型对应的数据库列类型应该是什么。
+     * 列类型取决于驱动程序。
      */
     mappedDataTypes: MappedColumnTypes
 
     /**
-     * Max length allowed by the DBMS for aliases (execution of queries).
+     * 数据库管理系统允许的别名最大长度（查询执行）。
      */
     maxAliasLength?: number
 
     cteCapabilities: CteCapabilities
 
     /**
-     * Dummy table name
+     * 虚拟表名
      */
     dummyTableName?: string
 
     /**
-     * Performs connection to the database.
-     * Depend on driver type it may create a connection pool.
+     * 执行与数据库的连接。
+     * 根据驱动程序类型，它可能会创建一个连接池。
      */
     connect(): Promise<void>
 
     /**
-     * Makes any action after connection (e.g. create extensions in Postgres driver).
+     * 连接后执行任何操作（例如在 Postgres 驱动程序中创建扩展）。
      */
     afterConnect(): Promise<void>
 
     /**
-     * Closes connection with database and releases all resources.
+     * 关闭与数据库的连接并释放所有资源。
      */
     disconnect(): Promise<void>
 
     /**
-     * Synchronizes database schema (creates tables, indices, etc).
+     * 同步数据库模式（创建表、索引等）。
      */
     createSchemaBuilder(): SchemaBuilder
 
     /**
-     * Creates a query runner used for common queries.
+     * 创建用于普通查询的查询运行器。
      */
     createQueryRunner(mode: ReplicationMode): QueryRunner
 
     /**
-     * Replaces parameters in the given sql with special escaping character
-     * and an array of parameter names to be passed to a query.
+     * 用特殊的转义字符替换给定 SQL 中的参数
+     * 以及要传递给查询的参数名称数组。
      */
     escapeQueryWithParameters(
         sql: string,
@@ -161,15 +161,15 @@ export interface Driver {
     ): [string, any[]]
 
     /**
-     * Escapes a table name, column name or an alias.
+     * 转义表名、列名或别名。
      *
-     * todo: probably escape should be able to handle dots in the names and automatically escape them
+     * todo: 转义应该能够处理名称中的点并自动转义它们
      */
     escape(name: string): string
 
     /**
-     * Build full table name with database name, schema name and table name.
-     * E.g. myDB.mySchema.myTable
+     * 使用数据库名称、模式名称和表名构建完整表名。
+     * 例如：myDB.mySchema.myTable
      */
     buildTableName(
         tableName: string,
@@ -178,24 +178,24 @@ export interface Driver {
     ): string
 
     /**
-     * Parse a target table name or other types and return a normalized table definition.
+     * 解析目标表名或其他类型并返回标准化的表定义。
      */
     parseTableName(
         target: EntityMetadata | Table | View | TableForeignKey | string,
     ): { tableName: string; schema?: string; database?: string }
 
     /**
-     * Prepares given value to a value to be persisted, based on its column type and metadata.
+     * 根据列类型和元数据，准备给定值以进行持久化。
      */
     preparePersistentValue(value: any, column: ColumnMetadata): any
 
     /**
-     * Prepares given value to a value to be persisted, based on its column type.
+     * 根据列类型，准备给定值以进行持久化。
      */
     prepareHydratedValue(value: any, column: ColumnMetadata): any
 
     /**
-     * Transforms type of the given column to a database column type.
+     * 将给定列的类型转换为数据库列类型。
      */
     normalizeType(column: {
         type?: ColumnType | string
@@ -206,41 +206,41 @@ export interface Driver {
     }): string
 
     /**
-     * Normalizes "default" value of the column.
+     * 规范化列的 "default" 值。
      */
     normalizeDefault(columnMetadata: ColumnMetadata): string | undefined
 
     /**
-     * Normalizes "isUnique" value of the column.
+     * 规范化列的 "isUnique" 值。
      */
     normalizeIsUnique(column: ColumnMetadata): boolean
 
     /**
-     * Calculates column length taking into account the default length values.
+     * 计算列长度，考虑默认长度值。
      */
     getColumnLength(column: ColumnMetadata): string
 
     /**
-     * Normalizes "default" value of the column.
+     * 规范化列的 "default" 值。
      */
     createFullType(column: TableColumn): string
 
     /**
-     * Obtains a new database connection to a master server.
-     * Used for replication.
-     * If replication is not setup then returns default connection's database connection.
+     * 获取到主服务器的新数据库连接。
+     * 用于复制。
+     * 如果未设置复制，则返回默认连接的数据库连接。
      */
     obtainMasterConnection(): Promise<any>
 
     /**
-     * Obtains a new database connection to a slave server.
-     * Used for replication.
-     * If replication is not setup then returns master (default) connection's database connection.
+     * 获取到从服务器的新数据库连接。
+     * 用于复制。
+     * 如果未设置复制，则返回主（默认）连接的数据库连接。
      */
     obtainSlaveConnection(): Promise<any>
 
     /**
-     * Creates generated map of values generated or returned by database after INSERT query.
+     * 创建由数据库在 INSERT 查询后生成或返回的值的映射。
      */
     createGeneratedMap(
         metadata: EntityMetadata,
@@ -250,8 +250,8 @@ export interface Driver {
     ): ObjectLiteral | undefined
 
     /**
-     * Differentiate columns of this table and columns from the given column metadatas columns
-     * and returns only changed.
+     * 区分此表的列和给定列元数据的列
+     * 并仅返回已更改的列。
      */
     findChangedColumns(
         tableColumns: TableColumn[],
@@ -259,22 +259,22 @@ export interface Driver {
     ): ColumnMetadata[]
 
     /**
-     * Returns true if driver supports RETURNING / OUTPUT statement.
+     * 如果驱动程序支持 RETURNING / OUTPUT 语句，则返回 true。
      */
     isReturningSqlSupported(returningType: ReturningType): boolean
 
     /**
-     * Returns true if driver supports uuid values generation on its own.
+     * 如果驱动程序自己支持 UUID 值生成，则返回 true。
      */
     isUUIDGenerationSupported(): boolean
 
     /**
-     * Returns true if driver supports fulltext indices.
+     * 如果驱动程序支持全文索引，则返回 true。
      */
     isFullTextColumnTypeSupported(): boolean
 
     /**
-     * Creates an escaped parameter.
+     * 创建一个转义参数。
      */
     createParameter(parameterName: string, index: number): string
 }
